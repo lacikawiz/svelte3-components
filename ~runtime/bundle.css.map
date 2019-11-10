@@ -1,0 +1,12 @@
+{
+  "version": 3,
+  "file": "bundle.css",
+  "sources": [
+    "../src/CompAutoComplete.svelte"
+  ],
+  "sourcesContent": [
+    "<script>\n  /*AutoComplete / QuickSelect component\n  A textbox which shows the possible values as one types in part of a matching string\n\n  */\n  export let name\n  export let placeholder\n  export let required\n  export let disabled\n  export let value\n\n  let results=[]\n  let isLoading=false\n\n</script>\n\n<div class=\"autocomplete\">\n  <input\n    type=\"text\"\n    {name}\n    {placeholder}\n    {required}\n    {disabled}\n    bind:value={value}\n\n  >\n  <ul>\n{#each results as result, i}\n    <li>\n    {@html result.label}\n    </li>\n{/each}\n  </ul>\n{#if isLoading}\n  <slot>\n    <p class=\"fallback\">Loading data...</p>\n  </slot>\n{/if}\n</div>\n\n\n<style>\n  * {\n    box-sizing: border-box;\n  }\n\n  input {\n    height: 2rem;\n    font-size: 1rem;\n    padding: 0.25rem 0.5rem;\n  }\n\n  .autocomplete {\n    position: relative;\n  }\n\n  .autocomplete ul {\n    list-style: none;\n    text-align: left;\n    position: absolute;\n    background: #34F;\n  }\n\n  .hide {\n    display: none;\n  }\n\n</style>\n"
+  ],
+  "names": [],
+  "mappings": "AA0CE,cAAE,CAAC,AACD,UAAU,CAAE,UAAU,AACxB,CAAC,AAED,KAAK,cAAC,CAAC,AACL,MAAM,CAAE,IAAI,CACZ,SAAS,CAAE,IAAI,CACf,OAAO,CAAE,OAAO,CAAC,MAAM,AACzB,CAAC,AAED,aAAa,cAAC,CAAC,AACb,QAAQ,CAAE,QAAQ,AACpB,CAAC,AAED,2BAAa,CAAC,EAAE,cAAC,CAAC,AAChB,UAAU,CAAE,IAAI,CAChB,UAAU,CAAE,IAAI,CAChB,QAAQ,CAAE,QAAQ,CAClB,UAAU,CAAE,IAAI,AAClB,CAAC"
+}

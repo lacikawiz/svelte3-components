@@ -45,9 +45,7 @@
   >
   <ul>
 {#each results as result, i}
-    <li>
-    {@html result.label}
-    </li>
+    <li> {@html result.label} </li>
 {/each}
   </ul>
 {#if isLoading}
@@ -57,7 +55,7 @@
 {/if}
 </div>
 
-{/else}
+{/if}
 
 <style>
   * {

@@ -1,4 +1,4 @@
-<!-- Svelte Modal component by Laszlo Szenes https://github.com/lacikawiz 
+<!-- Svelte Modal component by Laszlo Szenes https://github.com/lacikawiz
 Converted for Svelte 3
 
 Example:
@@ -25,19 +25,25 @@ Example:
 <button on:click={openModal}>Open Modal Without noExit</button>
 <button noExit on:click={openModal}>Open Modal With noExit</button>
 -->
+<script context=module>
+	let onTop=null   //keeping track of which open modal is on top
+</script>
+
 <script>
 	import {onMount} from 'svelte'
     let visible=false
     let result=null
-    let contentEl  //content element 
+    let contentEl  //content element
 
-//keep it for the promise    
+//keep it for the promise
     let resolve,reject
 
     let noExit
 
+    let watchers = []
+
     export let width
-//control object for 
+//control object for
 	export let control={
 		open: (options)=> {
 			noExit=false
@@ -46,37 +52,63 @@ Example:
 			}
 			visible=true
 			result=null
+
+			//moving the whole modal to the end position of the <body> to make sure it's displayed above everything (including the other possibly open modals)
+			// document.body.insertAdjacentElement('afterbegin',topDiv);
+			document.body.appendChild(topDiv);
+
 			contentEl.scrollTo(0,0)
 
 			return (new Promise((succ,fail)=>{
 				resolve=succ
 				reject=fail
-			})) 
+			}))
 		},
 		close: (res)=> {
 			visible=false
 			result=res
 		},
-		getResult: ()=> {return result}
+		getResult: ()=> {return result},
+		watchOpenClose: (handler) => {
+			watchers.push(handler)
+		}
 	}
 
-	$: if (visible) {
-		//when the modal gets active then we watch the keys
-		window.addEventListener("keydown",keyPress)
-		document.body.style.overflow="hidden" //this prevents scrolling of the main window
-	} else {
-		//when the modal is closed then we stop watching keys
-		window.removeEventListener("keydown",keyPress)
-		document.body.style.overflow=""
-		if (result===null) {
-			reject ? reject(): 0
+	$: handleVisible(visible)
+
+	let prevOnTop
+	function handleVisible(){
+		if (visible) {
+			//moving the DIV to the top level to make sure it's able to be a modal popup and cover everything
+			document.body.appendChild(topDiv);
+			//saving which modal was open before this opened
+			prevOnTop=onTop
+			//setting this one to be the top
+			onTop=topDiv
+			//when the modal gets active then we watch the keys
+			window.addEventListener("keydown",keyPress)
+			document.body.style.overflow="hidden" //this prevents scrolling of the main window
+			if (watchers) watchers.forEach((hnd)=>{ hnd("open") })
 		} else {
-			resolve ? resolve(result) :0 
+			//when the modal is closed then we stop watching keys
+			window.removeEventListener("keydown",keyPress)
+			//restoring the previous modal to be the top
+			onTop=prevOnTop
+			document.body.style.overflow=""
+			if (result===null) {
+				reject ? reject(): 0
+			} else {
+				resolve ? resolve(result) :0
+			}
+			if (watchers) watchers.forEach((hnd)=>{ hnd("close") })
 		}
 	}
 
 	function keyPress(ev){
-		if(ev.keyCode==27) closeIt() //ESC
+		//only respond if the current modal is the top one
+		if(ev.keyCode==27 && onTop==topDiv) {
+			closeIt() //ESC
+		}
 	}
 
 	function closeIt(){  //attempted close
@@ -84,11 +116,10 @@ Example:
 		visible=false
 	}
 
-	//moving the DIV to the top level to make sure it's able to be a modal popup and cover everything
 	let topDiv
 	onMount(()=>{
-		document.body.appendChild(topDiv);
 	})
+
 
 </script>
 
@@ -126,9 +157,10 @@ Example:
 		border-radius: 6px;
 		background: white;
 	    border: 3px outset #ddd;
-	    box-shadow: 10px 10px 5px #00000080;	
+	    box-shadow: 10px 10px 5px #00000080;
 		z-index: 100000;
-		height: 90vh;
+		max-height: 90vh;
+		overflow: auto;
 	}
 
 	#top {
